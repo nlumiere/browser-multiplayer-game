@@ -80,10 +80,10 @@ function Game() {
   return (
     <div className="Game">
       <Stage width={window.innerWidth} height={window.innerHeight}>
-				<Layer>
-					<Rect width={50} height={50} x={characterPos.x} y={characterPos.y} fill="red" />
-				</Layer>
-			</Stage>
+		<Layer>
+			<Rect width={50} height={50} x={characterPos.x} y={characterPos.y} fill="red" />
+		</Layer>
+	</Stage>
     </div>
   );
 }
