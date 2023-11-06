@@ -6,16 +6,14 @@ function Game() {
 	const [characterPos, setCharacterPos] = useState({x:20, y:20});
 	var playerPos = {x:20, y:20}
 	var movementButtons = {w: false, s: false, a: false, d: false}
-	var tickCount = 0
 
 	useEffect(() => {
 		const tickInterval = setInterval(() => {
-			tickCount++;
 			movePlayer()
-		}, 30);
+		}, 20);
 
 		return () => clearInterval(tickInterval);
-	}, [])
+	}, []);
 
 	window.addEventListener('keydown', (event) => {
 		const updatedMovement = {w: movementButtons.w, s: movementButtons.s, a: movementButtons.a, d: movementButtons.d};
