@@ -5,7 +5,7 @@ function Game() {
 	const SPEED = 10
 	const [characterPos, setCharacterPos] = useState({x:20, y:20});
 	var playerPos = {x:20, y:20}
-	var movementButtons = {x: 0, y: 0}
+	var movementButtons = {w: false, s: false, a: false, d: false}
 	var tickCount = 0
 
 	useEffect(() => {
@@ -18,40 +18,41 @@ function Game() {
 	}, [])
 
 	window.addEventListener('keydown', (event) => {
-		const updatedMovement = {x: movementButtons.x, y: movementButtons.y}
+		const updatedMovement = {w: movementButtons.w, s: movementButtons.s, a: movementButtons.a, d: movementButtons.d};
 		switch(event.key) {
 			case 'w':
-				updatedMovement.y = -1
+				updatedMovement.w = true
 				break;
 			case 's':
-				updatedMovement.y = 1
+				updatedMovement.s = true
 				break;
 			case 'a':
-				updatedMovement.x = -1
+				updatedMovement.a = true
 				break;
 			case 'd':
-				updatedMovement.x = 1
+				updatedMovement.d = true
 				break;
 			default:
 				return;
 		}
+		updatedMovement.any = true;
 		movementButtons = updatedMovement
 	})
 
 	window.addEventListener('keyup', (event) => {
-		const updatedMovement = {x: movementButtons.x, y: movementButtons.y}
+		const updatedMovement = {w: movementButtons.w, s: movementButtons.s, a: movementButtons.a, d: movementButtons.d};
 		switch(event.key) {
 			case 's':
-				updatedMovement.y = 0
+				updatedMovement.s = false
 				break;
 			case 'w':
-				updatedMovement.y = 0
+				updatedMovement.w = false
 				break;
 			case 'd':
-				updatedMovement.x = 0
+				updatedMovement.d = false
 				break;
 			case 'a':
-				updatedMovement.x = 0
+				updatedMovement.a = false
 				break;
 			default:
 				return;
@@ -60,16 +61,20 @@ function Game() {
 	})
 
 	const movePlayer = () => {
-		const x = movementButtons.x
-		const y = movementButtons.y
-		if (Math.abs(x) + Math.abs(y) === 0) {
+		const w = movementButtons.w
+		const s = movementButtons.s
+		const a = movementButtons.a
+		const d = movementButtons.d
+		const y = s - w
+		const x = d - a
+		if (x === 0 && y === 0) {
 			return;
 		}
 		const multiplier = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))/(Math.abs(x) + Math.abs(y))
 		console.log(playerPos)
 		playerPos = {
-			x: playerPos.x + Math.floor(SPEED*multiplier*movementButtons.x),
-			y: playerPos.y + Math.floor(SPEED*multiplier*movementButtons.y)
+			x: playerPos.x + Math.floor(SPEED*multiplier*x),
+			y: playerPos.y + Math.floor(SPEED*multiplier*y)
 		}
 		setCharacterPos(playerPos);
 	}
