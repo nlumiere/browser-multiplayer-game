@@ -4,7 +4,7 @@ import setupWebRTC from '../network/webrtc';
 
 function Game() {
   const SPEED = 10;
-  const PORT = 2222;
+  const WS_PORT = 8080;
   const HOSTNAME = 'localhost';
   const [characterPos, setCharacterPos] = useState({ x: 20, y: 20 });
   var playerPos = { x: 20, y: 20 };
@@ -12,10 +12,12 @@ function Game() {
 
   const peerConnection = new RTCPeerConnection();
   const dataChannel = peerConnection.createDataChannel('dataChannel');
-  const signalingServer = WebSocket(HOSTNAME + ':' + PORT);
+  const signalingServer = new WebSocket(
+    'ws://' + HOSTNAME + ':' + WS_PORT.toString()
+  );
 
   dataChannel.onopen = () => {
-    dataChannel.send('Hello from React!');
+    dataChannel.send({ data: 'Hello from React!' });
   };
 
   dataChannel.onmessage = (event) => {
@@ -23,7 +25,7 @@ function Game() {
   };
 
   useEffect(() => {
-    setupWebRTC();
+    setupWebRTC(peerConnection, dataChannel, signalingServer);
   }, []);
 
   useEffect(() => {
