@@ -1,8 +1,4 @@
-export default async function setupWebRTC(
-  peerConnection,
-  dataChannel,
-  signalingServer
-) {
+async function setupWebRTC(peerConnection, dataChannel, signalingServer) {
   try {
     signalingServer.onmessage = async (event) => {
       const message = JSON.parse(event.data);
@@ -41,3 +37,9 @@ export default async function setupWebRTC(
     console.error('WebRTC setup error:', error);
   }
 }
+
+function sendRTCMessage(obj) {
+  // TODO:
+}
+
+export { setupWebRTC, sendRTCMessage };

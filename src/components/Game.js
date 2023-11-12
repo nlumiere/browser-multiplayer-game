@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
-import setupWebRTC from '../network/webrtc';
+import setupWebRTC, { sendRTCMessage } from '../network/webrtc';
 
 function Game() {
   const SPEED = 10;
@@ -88,6 +88,10 @@ function Game() {
     }
     movementButtons = updatedMovement;
   });
+
+  const broadcastMovePlayer = (playerPos) => {
+    sendRTCMessage(playerPos);
+  };
 
   const movePlayer = () => {
     const w = movementButtons.w;
