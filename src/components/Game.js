@@ -30,7 +30,8 @@ function Game() {
 
   useEffect(() => {
     const tickInterval = setInterval(() => {
-      movePlayer();
+      broadcastMovePlayer();
+      movePlayerLocal();
     }, 20);
 
     return () => clearInterval(tickInterval);
@@ -93,7 +94,10 @@ function Game() {
     sendRTCMessage(playerPos);
   };
 
-  const movePlayer = () => {
+  // This function is responsible for calculating and moving the player locally
+  // Not to calculate the position and send to the server.
+  // The server will do its own calculations and send verification to the client.
+  const movePlayerLocal = () => {
     const w = movementButtons.w;
     const s = movementButtons.s;
     const a = movementButtons.a;

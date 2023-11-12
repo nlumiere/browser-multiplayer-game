@@ -38,7 +38,7 @@ async function setupWebRTC(peerConnection, dataChannel, signalingServer) {
   }
 }
 
-function sendRTCMessage(obj) {
+function sendRTCMessage(peerConnection, dataChannel, obj) {
   // TODO:
 }
 
