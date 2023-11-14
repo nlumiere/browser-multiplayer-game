@@ -1,3 +1,8 @@
+function getTimestamp() {
+  const now = new Date();
+  return now.getTime();
+}
+
 async function setupWebRTC(peerConnection, dataChannel, signalingServer) {
   try {
     // signalingServer.onmessage = async (event) => {
@@ -42,8 +47,8 @@ async function setupWebRTC(peerConnection, dataChannel, signalingServer) {
 //   // TODO:
 // }
 
-function sendWebsocketUpdate(websocketServer, message, time = 0) {
-  websocketServer.send(message, time);
+function sendWebsocketUpdate(websocket, time, message) {
+  websocket.send(message, time);
 }
 
-export { setupWebRTC, sendWebsocketUpdate };
+export { getTimestamp, setupWebRTC, sendWebsocketUpdate };
