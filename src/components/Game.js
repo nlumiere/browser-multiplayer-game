@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
-import setupWebRTC, { sendRTCMessage } from '../network/webrtc';
+import { setupWebRTC, sendWebsocketUpdate } from '../network/network';
+
+// MESSAGE TYPES:
+// 0: Movement
 
 function Game() {
   const SPEED = 10;
@@ -12,7 +15,7 @@ function Game() {
 
   const peerConnection = new RTCPeerConnection();
   const dataChannel = peerConnection.createDataChannel('dataChannel');
-  const signalingServer = new WebSocket(
+  const websocketServer = new WebSocket(
     'ws://' + HOSTNAME + ':' + WS_PORT.toString()
   );
 
@@ -24,9 +27,13 @@ function Game() {
     console.log('Received data from peer:', event.data);
   };
 
-  useEffect(() => {
-    setupWebRTC(peerConnection, dataChannel, signalingServer);
-  }, []);
+  websocketServer.onopen((event) => {
+    console.log('Connected to server:', event);
+  });
+
+  websocketServer.onmessage((ws, event) => {
+    console.log(event);
+  });
 
   useEffect(() => {
     const tickInterval = setInterval(() => {
@@ -62,6 +69,10 @@ function Game() {
     }
     updatedMovement.any = true;
     movementButtons = updatedMovement;
+    sendWebsocketUpdate(websocketServer, {
+      type: 0,
+      movement: movementButtons,
+    });
   });
 
   window.addEventListener('keyup', (event) => {
@@ -88,11 +99,11 @@ function Game() {
         return;
     }
     movementButtons = updatedMovement;
+    sendWebsocketUpdate(websocketServer, {
+      type: 0,
+      movement: movementButtons,
+    });
   });
-
-  const broadcastMovePlayer = (playerPos) => {
-    sendRTCMessage(playerPos);
-  };
 
   // This function is responsible for calculating and moving the player locally
   // Not to calculate the position and send to the server.
