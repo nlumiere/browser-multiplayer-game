@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import { getTimestamp, sendWebsocketUpdate } from '../network/network';
 
-const SPEED = 10;
+const SPEED = 3;
 const WS_PORT = 8080;
 const HOSTNAME = 'localhost';
+
+// TODO: Replace with login
+const USERNAME = 'TEST USER';
 
 const websocket = new WebSocket(`ws://${HOSTNAME}:${WS_PORT}`);
 
@@ -26,6 +29,7 @@ function Game() {
   };
 
   websocket.onopen = (event) => {
+    websocket.send(JSON.stringify({ type: 'handshake', username: USERNAME }));
     setConnection(true);
     console.log('Websocket connection established.', event);
   };
@@ -79,8 +83,10 @@ function Game() {
         movementButtons = updatedMovement;
         const timestamp = getTimestamp();
         console.log(timestamp);
-        sendWebsocketUpdate(websocket, timestamp, {
+        sendWebsocketUpdate(websocket, {
           type: 'movement',
+          username: USERNAME,
+          timestamp: timestamp,
           movement: updatedMovement,
         });
       }
@@ -114,8 +120,10 @@ function Game() {
         movementButtons = updatedMovement;
         const timestamp = getTimestamp();
         console.log(timestamp);
-        sendWebsocketUpdate(websocket, timestamp, {
+        sendWebsocketUpdate(websocket, {
           type: 'movement',
+          username: USERNAME,
+          timestamp: timestamp,
           movement: updatedMovement,
         });
       }

@@ -47,8 +47,8 @@ async function setupWebRTC(peerConnection, dataChannel, signalingServer) {
 //   // TODO:
 // }
 
-function sendWebsocketUpdate(websocket, time, message) {
-  websocket.send(message, time);
+function sendWebsocketUpdate(websocket, message) {
+  websocket.send(JSON.stringify(message));
 }
 
 export { getTimestamp, setupWebRTC, sendWebsocketUpdate };
