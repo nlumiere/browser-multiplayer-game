@@ -60,19 +60,10 @@ function Game() {
     var lastMovementTime = new Date().getTime();
 
     const isMovementEquivalent = (a, b) => {
-      return (
-        a.w === b.w &&
-        a.s === b.s &&
-        a.a === b.a &&
-        a.d === b.d &&
-        a.sprint === b.sprint
-      );
+      return a.w === b.w && a.s === b.s && a.a === b.a && a.d === b.d && a.sprint === b.sprint;
     };
     const isNothingPressed = (movement) => {
-      return (
-        movement.w + movement.s + movement.a + movement.d + movement.sprint ===
-        0
-      );
+      return movement.w + movement.s + movement.a + movement.d + movement.sprint === 0;
     };
 
     const tickInterval = setInterval(() => {
@@ -158,9 +149,7 @@ function Game() {
       if (x === 0 && y === 0) {
         return;
       }
-      const multiplier =
-        Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) /
-        (Math.abs(x) + Math.abs(y));
+      const multiplier = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) / (Math.abs(x) + Math.abs(y));
       const dt = timestamp - lastMovementTime;
       const dx = SPEED * speedMod * multiplier * x * (dt / 1000);
       const dy = SPEED * speedMod * multiplier * y * (dt / 1000);
@@ -177,13 +166,7 @@ function Game() {
     <div className='Game'>
       <Stage width={window.innerWidth} height={window.innerHeight}>
         <Layer>
-          <Rect
-            width={50}
-            height={50}
-            x={characterPos.x}
-            y={characterPos.y}
-            fill='red'
-          />
+          <Rect width={50} height={50} x={characterPos.x} y={characterPos.y} fill='red' />
         </Layer>
       </Stage>
     </div>
