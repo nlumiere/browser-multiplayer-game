@@ -50,15 +50,29 @@ function Game() {
     }
 
     var playerPos = { x: 20, y: 20 };
-    var movementButtons = { w: false, s: false, a: false, d: false };
+    var movementButtons = {
+      w: false,
+      s: false,
+      a: false,
+      d: false,
+      sprint: false,
+    };
     var lastMovementTime = new Date().getTime();
 
     const isMovementEquivalent = (a, b) => {
-      return a.w === b.w && a.s === b.s && a.a === b.a && a.d === b.d;
+      return (
+        a.w === b.w &&
+        a.s === b.s &&
+        a.a === b.a &&
+        a.d === b.d &&
+        a.sprint === b.sprint
+      );
     };
-
     const isNothingPressed = (movement) => {
-      return movement.w + movement.s + movement.a + movement.d === 0;
+      return (
+        movement.w + movement.s + movement.a + movement.d + movement.sprint ===
+        0
+      );
     };
 
     const tickInterval = setInterval(() => {
@@ -75,17 +89,25 @@ function Game() {
         s: movementButtons.s,
         a: movementButtons.a,
         d: movementButtons.d,
+        sprint: movementButtons.sprint,
       };
       switch (event.key) {
+        case 'Shift':
+          updatedMovement.sprint = isKeydown;
+          break;
+        case 'W':
         case 'w':
           updatedMovement.w = isKeydown;
           break;
+        case 'S':
         case 's':
           updatedMovement.s = isKeydown;
           break;
+        case 'A':
         case 'a':
           updatedMovement.a = isKeydown;
           break;
+        case 'D':
         case 'd':
           updatedMovement.d = isKeydown;
           break;
@@ -113,10 +135,12 @@ function Game() {
     };
 
     window.addEventListener('keydown', (event) => {
+      event.preventDefault();
       handleKeyPress(event, true);
     });
 
     window.addEventListener('keyup', (event) => {
+      event.preventDefault();
       handleKeyPress(event, false);
     });
 
@@ -128,6 +152,7 @@ function Game() {
       const s = movementButtons.s;
       const a = movementButtons.a;
       const d = movementButtons.d;
+      const speedMod = movementButtons.sprint + 1;
       const y = s - w;
       const x = d - a;
       if (x === 0 && y === 0) {
@@ -137,14 +162,12 @@ function Game() {
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) /
         (Math.abs(x) + Math.abs(y));
       const dt = timestamp - lastMovementTime;
-      const dx = SPEED * multiplier * x * (dt / 1000);
-      const dy = SPEED * multiplier * y * (dt / 1000);
-      console.log(dx, dy);
+      const dx = SPEED * speedMod * multiplier * x * (dt / 1000);
+      const dy = SPEED * speedMod * multiplier * y * (dt / 1000);
       playerPos = {
         x: Math.round(playerPos.x + dx),
         y: Math.round(playerPos.y + dy),
       };
-      console.log('POSTMOVE', playerPos);
       setCharacterPos(playerPos);
     };
     return () => clearInterval(tickInterval);
