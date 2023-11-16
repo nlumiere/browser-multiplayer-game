@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import { getTimestamp, sendWebsocketUpdate } from '../network/network';
 
-const SPEED = 3;
+const SPEED = 200;
 const WS_PORT = 8080;
 const HOSTNAME = 'localhost';
 
@@ -14,8 +14,6 @@ const websocket = new WebSocket(`ws://${HOSTNAME}:${WS_PORT}`);
 function Game() {
   const [characterPos, setCharacterPos] = useState({ x: 20, y: 20 });
   const [connection, setConnection] = useState(false);
-  var playerPos = { x: 20, y: 20 };
-  var movementButtons = { w: false, s: false, a: false, d: false };
 
   const peerConnection = new RTCPeerConnection();
   const dataChannel = peerConnection.createDataChannel('dataChannel');
@@ -51,11 +49,27 @@ function Game() {
       return;
     }
 
-    const tickInterval = setInterval(() => {
-      movePlayerLocal();
-    }, 20);
+    var playerPos = { x: 20, y: 20 };
+    var movementButtons = { w: false, s: false, a: false, d: false };
+    var lastMovementTime = new Date().getTime();
 
-    window.addEventListener('keydown', (event) => {
+    const isMovementEquivalent = (a, b) => {
+      return a.w === b.w && a.s === b.s && a.a === b.a && a.d === b.d;
+    };
+
+    const isNothingPressed = (movement) => {
+      return movement.w + movement.s + movement.a + movement.d === 0;
+    };
+
+    const tickInterval = setInterval(() => {
+      if (!isNothingPressed(movementButtons)) {
+        const now = getTimestamp();
+        movePlayerLocal(now);
+        lastMovementTime = now;
+      }
+    }, 15);
+
+    const getUpdatedMovement = (event, isKeydown) => {
       const updatedMovement = {
         w: movementButtons.w,
         s: movementButtons.s,
@@ -64,25 +78,31 @@ function Game() {
       };
       switch (event.key) {
         case 'w':
-          updatedMovement.w = true;
+          updatedMovement.w = isKeydown;
           break;
         case 's':
-          updatedMovement.s = true;
+          updatedMovement.s = isKeydown;
           break;
         case 'a':
-          updatedMovement.a = true;
+          updatedMovement.a = isKeydown;
           break;
         case 'd':
-          updatedMovement.d = true;
+          updatedMovement.d = isKeydown;
           break;
         default:
-          return;
+          return updatedMovement;
       }
+      return updatedMovement;
+    };
 
-      if (movementButtons !== updatedMovement) {
+    const handleKeyPress = (event, isKeydown) => {
+      const timestamp = getTimestamp();
+      if (isNothingPressed(movementButtons)) {
+        lastMovementTime = timestamp;
+      }
+      const updatedMovement = getUpdatedMovement(event, isKeydown);
+      if (!isMovementEquivalent(movementButtons, updatedMovement)) {
         movementButtons = updatedMovement;
-        const timestamp = getTimestamp();
-        console.log(timestamp);
         sendWebsocketUpdate(websocket, {
           type: 'movement',
           username: USERNAME,
@@ -90,49 +110,20 @@ function Game() {
           movement: updatedMovement,
         });
       }
+    };
+
+    window.addEventListener('keydown', (event) => {
+      handleKeyPress(event, true);
     });
 
     window.addEventListener('keyup', (event) => {
-      const updatedMovement = {
-        w: movementButtons.w,
-        s: movementButtons.s,
-        a: movementButtons.a,
-        d: movementButtons.d,
-      };
-      switch (event.key) {
-        case 's':
-          updatedMovement.s = false;
-          break;
-        case 'w':
-          updatedMovement.w = false;
-          break;
-        case 'd':
-          updatedMovement.d = false;
-          break;
-        case 'a':
-          updatedMovement.a = false;
-          break;
-        default:
-          return;
-      }
-
-      if (movementButtons !== updatedMovement) {
-        movementButtons = updatedMovement;
-        const timestamp = getTimestamp();
-        console.log(timestamp);
-        sendWebsocketUpdate(websocket, {
-          type: 'movement',
-          username: USERNAME,
-          timestamp: timestamp,
-          movement: updatedMovement,
-        });
-      }
+      handleKeyPress(event, false);
     });
 
     // This function is responsible for calculating and moving the player locally
     // Not to calculate the position and send to the server.
     // The server will do its own calculations and send verification to the client.
-    const movePlayerLocal = () => {
+    const movePlayerLocal = (timestamp) => {
       const w = movementButtons.w;
       const s = movementButtons.s;
       const a = movementButtons.a;
@@ -145,11 +136,15 @@ function Game() {
       const multiplier =
         Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) /
         (Math.abs(x) + Math.abs(y));
-      console.log(playerPos);
+      const dt = timestamp - lastMovementTime;
+      const dx = SPEED * multiplier * x * (dt / 1000);
+      const dy = SPEED * multiplier * y * (dt / 1000);
+      console.log(dx, dy);
       playerPos = {
-        x: playerPos.x + Math.floor(SPEED * multiplier * x),
-        y: playerPos.y + Math.floor(SPEED * multiplier * y),
+        x: Math.round(playerPos.x + dx),
+        y: Math.round(playerPos.y + dy),
       };
+      console.log('POSTMOVE', playerPos);
       setCharacterPos(playerPos);
     };
     return () => clearInterval(tickInterval);
