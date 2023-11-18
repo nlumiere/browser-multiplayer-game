@@ -32,10 +32,6 @@ function Game() {
     console.log('Websocket connection established.', event);
   };
 
-  websocket.onmessage = (ws, event) => {
-    console.log(event);
-  };
-
   const onErrorClose = () => {
     console.error('NO CONNECTION');
     setConnection(false);
@@ -58,6 +54,21 @@ function Game() {
       sprint: false,
     };
     var lastMovementTime = new Date().getTime();
+
+    websocket.onmessage = (event) => {
+      if (event.data) {
+        const data = JSON.parse(event.data);
+        console.log(data);
+        switch (data.type) {
+          case 'confMove':
+            playerPos = data.movement;
+            setCharacterPos(playerPos);
+            break;
+          default:
+            return;
+        }
+      }
+    };
 
     const isMovementEquivalent = (a, b) => {
       return a.w === b.w && a.s === b.s && a.a === b.a && a.d === b.d && a.sprint === b.sprint;
